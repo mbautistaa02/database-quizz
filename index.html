@@ -3,34 +3,585 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Quiz</title>
+
+    <title>Quiz de Bases de Datos</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin-top: 0;
+        }
+
+        .progress {
+            background: #dbeafe;
+            height: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            background: #60a5fa;
+            height: 100%;
+            width: 0%;
+            transition: 0.3s;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .question-number {
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .question {
+            font-size: 22px;
+            margin-bottom: 25px;
+        }
+
+        .option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .option:hover {
+            background: #eff6ff;
+            border-color: #93c5fd;
+        }
+
+        .correct {
+            background: #dcfce7 !important;
+            border-color: #22c55e !important;
+        }
+
+        .incorrect {
+            background: #fee2e2 !important;
+            border-color: #ef4444 !important;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .next {
+            margin-top: 20px;
+            padding: 13px 25px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .next:hover {
+            background: #1d4ed8;
+        }
+
+        .result {
+            text-align: center;
+            display: none;
+        }
+
+        .score {
+            font-size: 50px;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .restart {
+            padding: 13px 25px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
 </head>
+
 <body>
 
-    <h1>🎯 Mi página de quizzes</h1>
-    <p>¡Funciona! 🚀</p>
+<div class="container">
 
-    <h2>Quiz rápido</h2>
+    <div class="header">
+        <h1>🗄️ Quiz de Bases de Datos</h1>
+        <p>Aprende mientras respondes</p>
 
-    <p>¿Cuál es la capital de Colombia?</p>
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
 
-    <button onclick="respuesta('Bogotá')">Bogotá</button>
-    <button onclick="respuesta('Medellín')">Medellín</button>
-    <button onclick="respuesta('Cali')">Cali</button>
+    <div class="card" id="quiz">
 
-    <p id="resultado"></p>
+        <div class="question-number" id="questionNumber"></div>
 
-    <script>
-        function respuesta(opcion) {
-            const resultado = document.getElementById("resultado");
+        <div class="question" id="question"></div>
 
-            if (opcion === "Bogotá") {
-                resultado.textContent = "✅ ¡Correcto!";
-            } else {
-                resultado.textContent = "❌ Incorrecto";
-            }
-        }
-    </script>
+        <div id="options"></div>
+
+        <div class="explanation" id="explanation"></div>
+
+        <button class="next" id="nextButton" onclick="nextQuestion()">
+            Siguiente →
+        </button>
+
+    </div>
+
+    <div class="card result" id="result">
+
+        <h2>🎉 ¡Quiz terminado!</h2>
+
+        <p>Tu puntuación fue:</p>
+
+        <div class="score" id="score"></div>
+
+        <p id="message"></p>
+
+        <button class="restart" onclick="restartQuiz()">
+            Intentar nuevamente
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const questions = [
+
+    {
+        question: "¿Qué es una base de datos?",
+        options: [
+            "Un programa para diseñar páginas web",
+            "Una colección organizada de datos",
+            "Un lenguaje de programación",
+            "Un sistema operativo"
+        ],
+        answer: 1,
+        explanation: "Una base de datos es una colección organizada de información que permite almacenar, consultar y administrar datos."
+    },
+
+    {
+        question: "¿Qué significa SQL?",
+        options: [
+            "Simple Query Language",
+            "Structured Query Language",
+            "System Question Language",
+            "Structured Quick Logic"
+        ],
+        answer: 1,
+        explanation: "SQL significa Structured Query Language y se utiliza principalmente para trabajar con bases de datos relacionales."
+    },
+
+    {
+        question: "¿Cuál de estos es un sistema gestor de bases de datos (SGBD)?",
+        options: [
+            "MySQL",
+            "HTML",
+            "Git",
+            "React"
+        ],
+        answer: 0,
+        explanation: "MySQL es un SGBD. Otros ejemplos son PostgreSQL, Oracle Database y SQL Server."
+    },
+
+    {
+        question: "¿Qué es una tabla en una base de datos relacional?",
+        options: [
+            "Un conjunto de filas y columnas",
+            "Un archivo de imágenes",
+            "Un programa",
+            "Una contraseña"
+        ],
+        answer: 0,
+        explanation: "Una tabla organiza los datos en filas (registros) y columnas (atributos)."
+    },
+
+    {
+        question: "¿Qué representa normalmente una fila de una tabla?",
+        options: [
+            "Una base de datos completa",
+            "Un registro",
+            "Una columna",
+            "Una consulta"
+        ],
+        answer: 1,
+        explanation: "Cada fila representa un registro o instancia de la entidad almacenada."
+    },
+
+    {
+        question: "¿Qué representa una columna?",
+        options: [
+            "Un atributo",
+            "Una tabla completa",
+            "Una relación",
+            "Un usuario"
+        ],
+        answer: 0,
+        explanation: "Una columna representa un atributo. Por ejemplo, en una tabla estudiantes, 'nombre' podría ser un atributo."
+    },
+
+    {
+        question: "¿Para qué sirve una clave primaria (PRIMARY KEY)?",
+        options: [
+            "Para ordenar alfabéticamente",
+            "Para identificar de manera única cada registro",
+            "Para eliminar registros",
+            "Para crear copias de seguridad"
+        ],
+        answer: 1,
+        explanation: "La clave primaria identifica de forma única cada fila de una tabla y no debe repetirse."
+    },
+
+    {
+        question: "¿Qué característica debe tener una PRIMARY KEY?",
+        options: [
+            "Puede repetirse",
+            "Debe identificar de forma única cada registro",
+            "Siempre debe ser texto",
+            "Siempre debe ser mayor que 100"
+        ],
+        answer: 1,
+        explanation: "Una PRIMARY KEY debe ser única y no puede tener valores NULL."
+    },
+
+    {
+        question: "¿Para qué sirve una FOREIGN KEY?",
+        options: [
+            "Para relacionar tablas",
+            "Para cifrar datos",
+            "Para eliminar una base de datos",
+            "Para crear usuarios"
+        ],
+        answer: 0,
+        explanation: "Una FOREIGN KEY permite establecer relaciones entre tablas haciendo referencia a una clave de otra tabla."
+    },
+
+    {
+        question: "¿Qué hace SELECT en SQL?",
+        options: [
+            "Elimina datos",
+            "Modifica datos",
+            "Consulta datos",
+            "Crea usuarios"
+        ],
+        answer: 2,
+        explanation: "SELECT se utiliza para consultar y obtener información almacenada en una base de datos."
+    },
+
+    {
+        question: "¿Qué hace INSERT?",
+        options: [
+            "Agrega registros",
+            "Elimina registros",
+            "Modifica tablas",
+            "Cierra la conexión"
+        ],
+        answer: 0,
+        explanation: "INSERT permite agregar nuevos registros a una tabla."
+    },
+
+    {
+        question: "¿Qué hace UPDATE?",
+        options: [
+            "Consulta datos",
+            "Modifica registros existentes",
+            "Crea una base de datos",
+            "Elimina una tabla"
+        ],
+        answer: 1,
+        explanation: "UPDATE permite modificar información que ya existe en una tabla."
+    },
+
+    {
+        question: "¿Qué hace DELETE?",
+        options: [
+            "Elimina registros",
+            "Crea registros",
+            "Consulta registros",
+            "Cambia el nombre de una base de datos"
+        ],
+        answer: 0,
+        explanation: "DELETE elimina registros de una tabla. Por eso es importante utilizar WHERE cuando solo queremos eliminar algunos registros."
+    },
+
+    {
+        question: "¿Qué hace WHERE en una consulta SQL?",
+        options: [
+            "Ordena los resultados",
+            "Filtra los registros",
+            "Crea una tabla",
+            "Cuenta columnas"
+        ],
+        answer: 1,
+        explanation: "WHERE permite establecer condiciones para seleccionar únicamente los registros que cumplen ciertos criterios."
+    },
+
+    {
+        question: "¿Qué hace ORDER BY?",
+        options: [
+            "Ordena los resultados",
+            "Elimina resultados",
+            "Crea relaciones",
+            "Inserta registros"
+        ],
+        answer: 0,
+        explanation: "ORDER BY permite ordenar los resultados de una consulta, por ejemplo de menor a mayor."
+    },
+
+    {
+        question: "¿Qué significa NULL en una base de datos?",
+        options: [
+            "El número cero",
+            "Una cadena vacía",
+            "Ausencia o desconocimiento de un valor",
+            "Un valor negativo"
+        ],
+        answer: 2,
+        explanation: "NULL representa la ausencia de un valor. No significa necesariamente cero ni una cadena vacía."
+    },
+
+    {
+        question: "¿Qué es la normalización?",
+        options: [
+            "Un proceso para reducir redundancia y mejorar la estructura de los datos",
+            "Un método para aumentar el tamaño de una base de datos",
+            "Un lenguaje de programación",
+            "Una forma de cifrado"
+        ],
+        answer: 0,
+        explanation: "La normalización organiza las tablas para reducir redundancias y evitar problemas de actualización de datos."
+    },
+
+    {
+        question: "¿Qué relación representa normalmente una FOREIGN KEY?",
+        options: [
+            "La relación entre registros de diferentes tablas",
+            "La relación entre dos computadoras",
+            "La relación entre dos lenguajes",
+            "La relación entre dos contraseñas"
+        ],
+        answer: 0,
+        explanation: "Una FOREIGN KEY permite representar relaciones entre datos almacenados en diferentes tablas."
+    },
+
+    {
+        question: "¿Cuál es una característica típica de las bases de datos relacionales?",
+        options: [
+            "Organizan la información mediante tablas relacionadas",
+            "Solo almacenan imágenes",
+            "No permiten realizar consultas",
+            "No pueden tener restricciones"
+        ],
+        answer: 0,
+        explanation: "Las bases de datos relacionales organizan los datos en tablas y permiten establecer relaciones entre ellas."
+    },
+
+    {
+        question: "¿Qué es una consulta (query)?",
+        options: [
+            "Una solicitud para obtener o manipular información",
+            "Un tipo de servidor",
+            "Una contraseña",
+            "Una copia de seguridad"
+        ],
+        answer: 0,
+        explanation: "Una query es una instrucción que permite consultar o manipular información en una base de datos."
+    }
+
+];
+
+let currentQuestion = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+
+    answered = false;
+
+    const q = questions[currentQuestion];
+
+    document.getElementById("questionNumber").textContent =
+        `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+
+    document.getElementById("question").textContent = q.question;
+
+    const optionsContainer = document.getElementById("options");
+    optionsContainer.innerHTML = "";
+
+    document.getElementById("explanation").style.display = "none";
+    document.getElementById("nextButton").style.display = "none";
+
+    q.options.forEach((option, index) => {
+
+        const button = document.createElement("button");
+
+        button.className = "option";
+        button.textContent = option;
+
+        button.onclick = () => selectAnswer(index, button);
+
+        optionsContainer.appendChild(button);
+    });
+
+    const progress =
+        ((currentQuestion) / questions.length) * 100;
+
+    document.getElementById("progressBar").style.width =
+        progress + "%";
+}
+
+
+function selectAnswer(index, button) {
+
+    if (answered) return;
+
+    answered = true;
+
+    const q = questions[currentQuestion];
+
+    const buttons =
+        document.querySelectorAll(".option");
+
+    buttons.forEach(b => b.disabled = true);
+
+    if (index === q.answer) {
+
+        button.classList.add("correct");
+
+        score++;
+
+    } else {
+
+        button.classList.add("incorrect");
+
+        buttons[q.answer].classList.add("correct");
+    }
+
+    const explanation =
+        document.getElementById("explanation");
+
+    explanation.innerHTML =
+        "<strong>💡 Aprende:</strong> " + q.explanation;
+
+    explanation.style.display = "block";
+
+    document.getElementById("nextButton").style.display =
+        "inline-block";
+}
+
+
+function nextQuestion() {
+
+    currentQuestion++;
+
+    if (currentQuestion < questions.length) {
+
+        loadQuestion();
+
+    } else {
+
+        showResult();
+    }
+}
+
+
+function showResult() {
+
+    document.getElementById("quiz").style.display =
+        "none";
+
+    document.getElementById("result").style.display =
+        "block";
+
+    document.getElementById("progressBar").style.width =
+        "100%";
+
+    document.getElementById("score").textContent =
+        `${score} / ${questions.length}`;
+
+    let message;
+
+    if (score >= 18) {
+        message = "🏆 ¡Excelente! Tienes una muy buena base en bases de datos.";
+    } else if (score >= 14) {
+        message = "👏 ¡Muy bien! Solo necesitas reforzar algunos conceptos.";
+    } else if (score >= 10) {
+        message = "📚 Vas por buen camino. Repasa los conceptos que fallaste.";
+    } else {
+        message = "💪 Sigue practicando. ¡Cada pregunta es una oportunidad para aprender!";
+    }
+
+    document.getElementById("message").textContent =
+        message;
+}
+
+
+function restartQuiz() {
+
+    currentQuestion = 0;
+    score = 0;
+
+    document.getElementById("quiz").style.display =
+        "block";
+
+    document.getElementById("result").style.display =
+        "none";
+
+    loadQuestion();
+}
+
+
+loadQuestion();
+
+</script>
 
 </body>
 </html>
