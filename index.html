@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Quiz</title>
+</head>
+<body>
+
+    <h1>🎯 Mi página de quizzes</h1>
+    <p>¡Funciona! 🚀</p>
+
+    <h2>Quiz rápido</h2>
+
+    <p>¿Cuál es la capital de Colombia?</p>
+
+    <button onclick="respuesta('Bogotá')">Bogotá</button>
+    <button onclick="respuesta('Medellín')">Medellín</button>
+    <button onclick="respuesta('Cali')">Cali</button>
+
+    <p id="resultado"></p>
+
+    <script>
+        function respuesta(opcion) {
+            const resultado = document.getElementById("resultado");
+
+            if (opcion === "Bogotá") {
+                resultado.textContent = "✅ ¡Correcto!";
+            } else {
+                resultado.textContent = "❌ Incorrecto";
+            }
+        }
+    </script>
+
+</body>
+</html>
