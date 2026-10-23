@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Quiz de Bases de Datos</title>
 
     <style>
@@ -14,7 +13,7 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f4f6f8;
+            background: #FFFFFF;
             color: #1f2937;
         }
 
@@ -25,8 +24,8 @@
         }
 
         .header {
-            background: #2563eb;
-            color: white;
+            background: #D853B4;
+            color: #FFFFFF;
             padding: 30px;
             border-radius: 16px;
             text-align: center;
@@ -38,7 +37,7 @@
         }
 
         .progress {
-            background: #dbeafe;
+            background: #FFFFFF;
             height: 10px;
             border-radius: 10px;
             overflow: hidden;
@@ -46,21 +45,22 @@
         }
 
         .progress-bar {
-            background: #60a5fa;
+            background: #B0238A;
             height: 100%;
             width: 0%;
             transition: 0.3s;
         }
 
         .card {
-            background: white;
+            background: #FFFFFF;
             padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 5px 20px rgba(176, 35, 138, 0.12);
+            margin-bottom: 20px;
         }
 
         .question-number {
-            color: #2563eb;
+            color: #B0238A;
             font-weight: bold;
         }
 
@@ -75,21 +75,27 @@
             text-align: left;
             padding: 15px;
             margin: 10px 0;
-            border: 2px solid #e5e7eb;
+            border: 2px solid #BCEDEF;
             border-radius: 10px;
-            background: white;
+            background: #FFFFFF;
+            color: #1f2937;
             cursor: pointer;
             font-size: 16px;
         }
 
-        .option:hover {
-            background: #eff6ff;
-            border-color: #93c5fd;
+        .option:hover:not(:disabled) {
+            border-color: #D853B4;
+            background: #fdf2fa;
+        }
+
+        .option:disabled {
+            cursor: default;
+            color: #1f2937;
         }
 
         .correct {
             background: #dcfce7 !important;
-            border-color: #22c55e !important;
+            border-color: #22a06b !important;
         }
 
         .incorrect {
@@ -100,46 +106,91 @@
         .explanation {
             margin-top: 20px;
             padding: 15px;
-            background: #f3f4f6;
+            background: #BCEDEF;
             border-radius: 10px;
             display: none;
+            line-height: 1.5;
+        }
+
+        .next, .restart, .level-button, .secondary {
+            padding: 13px 25px;
+            border: none;
+            border-radius: 10px;
+            background: #B0238A;
+            color: #FFFFFF;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
         }
 
         .next {
             margin-top: 20px;
-            padding: 13px 25px;
-            border: none;
-            border-radius: 10px;
-            background: #2563eb;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
             display: none;
         }
 
-        .next:hover {
-            background: #1d4ed8;
+        .next:hover, .restart:hover, .level-button:hover {
+            background: #8F1C70;
         }
 
-        .result {
-            text-align: center;
+        .secondary {
+            background: #BCEDEF;
+            color: #1f2937;
+        }
+
+        .secondary:hover {
+            background: #91dfe4;
+        }
+
+        .result, #quiz, #levelMenu {
             display: none;
         }
 
         .score {
             font-size: 50px;
-            color: #2563eb;
+            color: #B0238A;
             font-weight: bold;
         }
 
-        .restart {
-            padding: 13px 25px;
-            border: none;
-            border-radius: 10px;
-            background: #2563eb;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
+        .level-description {
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .code-example {
+            display: block;
+            padding: 12px;
+            margin-top: 10px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        .menu-actions, .result-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 15px auto;
+                padding: 12px;
+            }
+
+            .header, .card {
+                padding: 22px;
+            }
+
+            .question {
+                font-size: 19px;
+            }
+
+            .score {
+                font-size: 40px;
+            }
         }
     </style>
 </head>
@@ -150,19 +201,40 @@
 
     <div class="header">
         <h1>🗄️ Quiz de Bases de Datos</h1>
-        <p>Aprende mientras respondes</p>
+        <p id="subtitle">Aprende mientras respondes</p>
 
         <div class="progress">
             <div class="progress-bar" id="progressBar"></div>
         </div>
     </div>
 
+    <!-- Menú de niveles -->
+    <div class="card" id="levelMenu">
+        <h2>¡Elige tu nivel!</h2>
+
+        <div class="level-description">
+            <p><strong>Nivel 1: Fundamentos</strong></p>
+            <p>Conceptos básicos, tablas, claves y consultas SQL.</p>
+
+            <p><strong>Nivel 2: SQL avanzado</strong></p>
+            <p>JOIN, subconsultas, funciones de agregación, vistas, permisos y roles.</p>
+        </div>
+
+        <div class="menu-actions">
+            <button class="level-button" onclick="startLevel(1)">
+                Comenzar nivel 1
+            </button>
+
+            <button class="level-button" onclick="startLevel(2)">
+                Ir al nivel 2 →
+            </button>
+        </div>
+    </div>
+
+    <!-- Pantalla de preguntas -->
     <div class="card" id="quiz">
-
         <div class="question-number" id="questionNumber"></div>
-
         <div class="question" id="question"></div>
-
         <div id="options"></div>
 
         <div class="explanation" id="explanation"></div>
@@ -170,32 +242,42 @@
         <button class="next" id="nextButton" onclick="nextQuestion()">
             Siguiente →
         </button>
-
     </div>
 
+    <!-- Resultados -->
     <div class="card result" id="result">
-
-        <h2>🎉 ¡Quiz terminado!</h2>
-
+        <h2>🎉 ¡Nivel terminado!</h2>
+        <p id="resultTitle"></p>
         <p>Tu puntuación fue:</p>
 
         <div class="score" id="score"></div>
-
         <p id="message"></p>
 
-        <button class="restart" onclick="restartQuiz()">
-            Intentar nuevamente
-        </button>
+        <div class="result-actions">
+            <button class="restart" onclick="restartLevel()">
+                Repetir nivel
+            </button>
 
+            <button class="level-button" id="nextLevelButton"
+                    onclick="startLevel(2)">
+                Desbloquear nivel 2 →
+            </button>
+
+            <button class="secondary" onclick="showMenu()">
+                Menú de niveles
+            </button>
+        </div>
     </div>
 
 </div>
 
-
 <script>
 
-const questions = [
+// ===============================
+// NIVEL 1: FUNDAMENTOS
+// ===============================
 
+const level1 = [
     {
         question: "¿Qué es una base de datos?",
         options: [
@@ -207,7 +289,6 @@ const questions = [
         answer: 1,
         explanation: "Una base de datos es una colección organizada de información que permite almacenar, consultar y administrar datos."
     },
-
     {
         question: "¿Qué significa SQL?",
         options: [
@@ -217,23 +298,16 @@ const questions = [
             "Structured Quick Logic"
         ],
         answer: 1,
-        explanation: "SQL significa Structured Query Language y se utiliza principalmente para trabajar con bases de datos relacionales."
+        explanation: "SQL significa Structured Query Language y se utiliza para trabajar con bases de datos relacionales."
     },
-
     {
-        question: "¿Cuál de estos es un sistema gestor de bases de datos (SGBD)?",
-        options: [
-            "MySQL",
-            "HTML",
-            "Git",
-            "React"
-        ],
+        question: "¿Cuál es un sistema gestor de bases de datos?",
+        options: ["MySQL", "HTML", "Git", "React"],
         answer: 0,
         explanation: "MySQL es un SGBD. Otros ejemplos son PostgreSQL, Oracle Database y SQL Server."
     },
-
     {
-        question: "¿Qué es una tabla en una base de datos relacional?",
+        question: "¿Qué es una tabla relacional?",
         options: [
             "Un conjunto de filas y columnas",
             "Un archivo de imágenes",
@@ -243,9 +317,8 @@ const questions = [
         answer: 0,
         explanation: "Una tabla organiza los datos en filas (registros) y columnas (atributos)."
     },
-
     {
-        question: "¿Qué representa normalmente una fila de una tabla?",
+        question: "¿Qué representa una fila?",
         options: [
             "Una base de datos completa",
             "Un registro",
@@ -253,9 +326,8 @@ const questions = [
             "Una consulta"
         ],
         answer: 1,
-        explanation: "Cada fila representa un registro o instancia de la entidad almacenada."
+        explanation: "Cada fila representa un registro almacenado en la tabla."
     },
-
     {
         question: "¿Qué representa una columna?",
         options: [
@@ -265,47 +337,43 @@ const questions = [
             "Un usuario"
         ],
         answer: 0,
-        explanation: "Una columna representa un atributo. Por ejemplo, en una tabla estudiantes, 'nombre' podría ser un atributo."
+        explanation: "Una columna representa un atributo, como el nombre de un estudiante."
     },
-
     {
-        question: "¿Para qué sirve una clave primaria (PRIMARY KEY)?",
+        question: "¿Para qué sirve PRIMARY KEY?",
         options: [
             "Para ordenar alfabéticamente",
             "Para identificar de manera única cada registro",
             "Para eliminar registros",
-            "Para crear copias de seguridad"
+            "Para crear copias"
         ],
         answer: 1,
-        explanation: "La clave primaria identifica de forma única cada fila de una tabla y no debe repetirse."
+        explanation: "La clave primaria identifica de forma única cada fila y no admite valores NULL."
     },
-
     {
-        question: "¿Qué característica debe tener una PRIMARY KEY?",
+        question: "¿Qué característica tiene una PRIMARY KEY?",
         options: [
             "Puede repetirse",
-            "Debe identificar de forma única cada registro",
+            "Identifica de forma única cada registro",
             "Siempre debe ser texto",
             "Siempre debe ser mayor que 100"
         ],
         answer: 1,
-        explanation: "Una PRIMARY KEY debe ser única y no puede tener valores NULL."
+        explanation: "Una clave primaria debe ser única y no puede contener valores NULL."
     },
-
     {
-        question: "¿Para qué sirve una FOREIGN KEY?",
+        question: "¿Para qué sirve FOREIGN KEY?",
         options: [
             "Para relacionar tablas",
             "Para cifrar datos",
-            "Para eliminar una base de datos",
+            "Para borrar una base de datos",
             "Para crear usuarios"
         ],
         answer: 0,
-        explanation: "Una FOREIGN KEY permite establecer relaciones entre tablas haciendo referencia a una clave de otra tabla."
+        explanation: "Una clave foránea referencia una clave de otra tabla o de la misma tabla."
     },
-
     {
-        question: "¿Qué hace SELECT en SQL?",
+        question: "¿Qué hace SELECT?",
         options: [
             "Elimina datos",
             "Modifica datos",
@@ -313,9 +381,8 @@ const questions = [
             "Crea usuarios"
         ],
         answer: 2,
-        explanation: "SELECT se utiliza para consultar y obtener información almacenada en una base de datos."
+        explanation: "SELECT permite consultar y obtener información de una base de datos."
     },
-
     {
         question: "¿Qué hace INSERT?",
         options: [
@@ -325,9 +392,8 @@ const questions = [
             "Cierra la conexión"
         ],
         answer: 0,
-        explanation: "INSERT permite agregar nuevos registros a una tabla."
+        explanation: "INSERT agrega nuevos registros a una tabla."
     },
-
     {
         question: "¿Qué hace UPDATE?",
         options: [
@@ -337,33 +403,30 @@ const questions = [
             "Elimina una tabla"
         ],
         answer: 1,
-        explanation: "UPDATE permite modificar información que ya existe en una tabla."
+        explanation: "UPDATE permite modificar datos existentes."
     },
-
     {
         question: "¿Qué hace DELETE?",
         options: [
             "Elimina registros",
             "Crea registros",
             "Consulta registros",
-            "Cambia el nombre de una base de datos"
+            "Cambia nombres"
         ],
         answer: 0,
-        explanation: "DELETE elimina registros de una tabla. Por eso es importante utilizar WHERE cuando solo queremos eliminar algunos registros."
+        explanation: "DELETE elimina registros. WHERE permite limitar cuáles se eliminan."
     },
-
     {
-        question: "¿Qué hace WHERE en una consulta SQL?",
+        question: "¿Qué hace WHERE?",
         options: [
-            "Ordena los resultados",
-            "Filtra los registros",
+            "Ordena resultados",
+            "Filtra registros",
             "Crea una tabla",
             "Cuenta columnas"
         ],
         answer: 1,
-        explanation: "WHERE permite establecer condiciones para seleccionar únicamente los registros que cumplen ciertos criterios."
+        explanation: "WHERE establece condiciones para seleccionar registros."
     },
-
     {
         question: "¿Qué hace ORDER BY?",
         options: [
@@ -373,11 +436,10 @@ const questions = [
             "Inserta registros"
         ],
         answer: 0,
-        explanation: "ORDER BY permite ordenar los resultados de una consulta, por ejemplo de menor a mayor."
+        explanation: "ORDER BY ordena los resultados de una consulta."
     },
-
     {
-        question: "¿Qué significa NULL en una base de datos?",
+        question: "¿Qué significa NULL?",
         options: [
             "El número cero",
             "Una cadena vacía",
@@ -385,67 +447,351 @@ const questions = [
             "Un valor negativo"
         ],
         answer: 2,
-        explanation: "NULL representa la ausencia de un valor. No significa necesariamente cero ni una cadena vacía."
+        explanation: "NULL representa la ausencia de un valor; no equivale necesariamente a cero o a una cadena vacía."
     },
-
     {
         question: "¿Qué es la normalización?",
         options: [
             "Un proceso para reducir redundancia y mejorar la estructura de los datos",
-            "Un método para aumentar el tamaño de una base de datos",
-            "Un lenguaje de programación",
+            "Un método para aumentar el tamaño",
+            "Un lenguaje",
             "Una forma de cifrado"
         ],
         answer: 0,
-        explanation: "La normalización organiza las tablas para reducir redundancias y evitar problemas de actualización de datos."
+        explanation: "La normalización organiza las tablas para reducir redundancias y anomalías."
     },
-
     {
-        question: "¿Qué relación representa normalmente una FOREIGN KEY?",
+        question: "¿Qué representa una FOREIGN KEY?",
         options: [
-            "La relación entre registros de diferentes tablas",
-            "La relación entre dos computadoras",
-            "La relación entre dos lenguajes",
-            "La relación entre dos contraseñas"
+            "Una relación entre datos de tablas",
+            "Una conexión entre computadoras",
+            "Una relación entre lenguajes",
+            "Una contraseña"
         ],
         answer: 0,
-        explanation: "Una FOREIGN KEY permite representar relaciones entre datos almacenados en diferentes tablas."
+        explanation: "Una clave foránea permite establecer relaciones entre registros."
     },
-
     {
-        question: "¿Cuál es una característica típica de las bases de datos relacionales?",
+        question: "¿Qué caracteriza a una base de datos relacional?",
         options: [
-            "Organizan la información mediante tablas relacionadas",
-            "Solo almacenan imágenes",
-            "No permiten realizar consultas",
-            "No pueden tener restricciones"
+            "Organiza información en tablas relacionadas",
+            "Solo almacena imágenes",
+            "No permite consultas",
+            "No permite restricciones"
         ],
         answer: 0,
-        explanation: "Las bases de datos relacionales organizan los datos en tablas y permiten establecer relaciones entre ellas."
+        explanation: "Las bases de datos relacionales organizan los datos en tablas que pueden relacionarse."
     },
-
     {
         question: "¿Qué es una consulta (query)?",
         options: [
-            "Una solicitud para obtener o manipular información",
+            "Una instrucción para obtener o manipular información",
             "Un tipo de servidor",
             "Una contraseña",
             "Una copia de seguridad"
         ],
         answer: 0,
-        explanation: "Una query es una instrucción que permite consultar o manipular información en una base de datos."
+        explanation: "Una consulta es una instrucción que permite consultar o manipular información."
     }
-
 ];
 
+
+// ===============================
+// NIVEL 2: SQL AVANZADO
+// ===============================
+
+const level2 = [
+    {
+        question: "¿Para qué sirve INNER JOIN?",
+        options: [
+            "Para mostrar todas las filas de ambas tablas",
+            "Para combinar filas que cumplen la condición de unión",
+            "Para eliminar filas repetidas",
+            "Para crear una vista"
+        ],
+        answer: 1,
+        explanation: "INNER JOIN devuelve las filas que tienen coincidencias en ambas tablas según la condición ON."
+    },
+    {
+        question: "¿Qué diferencia a LEFT JOIN de INNER JOIN?",
+        options: [
+            "LEFT JOIN conserva todas las filas de la tabla izquierda, aunque no tengan coincidencia",
+            "LEFT JOIN solo devuelve coincidencias",
+            "LEFT JOIN elimina la tabla izquierda",
+            "No existe ninguna diferencia"
+        ],
+        answer: 0,
+        explanation: "LEFT JOIN conserva todas las filas de la tabla izquierda. Cuando no hay coincidencia, las columnas de la derecha aparecen como NULL."
+    },
+    {
+        question: "¿Qué devuelve RIGHT JOIN?",
+        options: [
+            "Solo filas de la tabla izquierda",
+            "Todas las filas de la tabla derecha y sus coincidencias en la izquierda",
+            "Solo las filas coincidentes",
+            "Un conteo de las tablas"
+        ],
+        answer: 1,
+        explanation: "RIGHT JOIN conserva todas las filas de la tabla derecha, incluso cuando no tienen coincidencia en la izquierda."
+    },
+    {
+        question: "¿Qué busca obtener FULL OUTER JOIN?",
+        options: [
+            "Solo las filas coincidentes",
+            "Todas las filas de ambas tablas, coincidan o no",
+            "Solo las filas de la izquierda",
+            "Solo las filas de la derecha"
+        ],
+        answer: 1,
+        explanation: "FULL OUTER JOIN conserva las filas de ambas tablas. Las columnas sin coincidencia se completan con NULL. No todos los SGBD lo admiten directamente."
+    },
+    {
+        question: "Observa la consulta. ¿Qué información devuelve?",
+        code: "SELECT E.nombre, C.nombre\nFROM Estudiantes E\nINNER JOIN Cursos C ON E.curso_id = C.id;",
+        options: [
+            "Todos los estudiantes, tengan curso o no",
+            "Los nombres de estudiantes y sus cursos coincidentes",
+            "Solo los cursos sin estudiantes",
+            "El número de cursos"
+        ],
+        answer: 1,
+        explanation: "La condición ON relaciona cada estudiante con el curso cuyo id coincide con curso_id. INNER JOIN excluye las filas sin coincidencia."
+    },
+    {
+        question: "¿Qué es una subconsulta?",
+        options: [
+            "Una consulta SQL dentro de otra consulta",
+            "Una tabla sin columnas",
+            "Un usuario de la base de datos",
+            "Una función para ordenar"
+        ],
+        answer: 0,
+        explanation: "Una subconsulta es una consulta anidada que proporciona datos a otra consulta."
+    },
+    {
+        question: "¿Qué devuelve esta consulta si hay productos con precio superior al promedio?",
+        code: "SELECT nombre\nFROM Productos\nWHERE precio > (\n  SELECT AVG(precio) FROM Productos\n);",
+        options: [
+            "Todos los productos",
+            "Los productos cuyo precio supera el promedio",
+            "El producto más barato",
+            "El promedio de los nombres"
+        ],
+        answer: 1,
+        explanation: "La subconsulta calcula el precio promedio y la consulta externa selecciona los productos que lo superan."
+    },
+    {
+        question: "¿Qué función calcula el promedio de una columna numérica?",
+        options: ["COUNT()", "SUM()", "AVG()", "MAX()"],
+        answer: 2,
+        explanation: "AVG() calcula el promedio de los valores no NULL de una columna."
+    },
+    {
+        question: "¿Qué devuelve MIN(precio)?",
+        options: [
+            "El precio más alto",
+            "La suma de los precios",
+            "El precio más bajo",
+            "La cantidad de productos"
+        ],
+        answer: 2,
+        explanation: "MIN() devuelve el menor valor no NULL de la expresión o columna."
+    },
+    {
+        question: "¿Qué devuelve MAX(precio)?",
+        options: [
+            "El precio más bajo",
+            "El precio más alto",
+            "El promedio",
+            "La cantidad de precios"
+        ],
+        answer: 1,
+        explanation: "MAX() devuelve el mayor valor no NULL."
+    },
+    {
+        question: "¿Qué calcula COUNT(*)?",
+        options: [
+            "La suma de una columna",
+            "El promedio de una columna",
+            "La cantidad de filas",
+            "El valor máximo"
+        ],
+        answer: 2,
+        explanation: "COUNT(*) cuenta las filas del resultado, incluso cuando algunas columnas contienen NULL."
+    },
+    {
+        question: "¿Para qué sirve SUM(precio)?",
+        options: [
+            "Para sumar los precios",
+            "Para contar productos",
+            "Para hallar el precio mínimo",
+            "Para ordenar precios"
+        ],
+        answer: 0,
+        explanation: "SUM() suma los valores no NULL de una columna numérica."
+    },
+    {
+        question: "¿Para qué se utiliza GROUP BY?",
+        options: [
+            "Para agrupar filas según una o varias columnas",
+            "Para ordenar alfabéticamente",
+            "Para borrar grupos",
+            "Para crear permisos"
+        ],
+        answer: 0,
+        explanation: "GROUP BY crea grupos de filas con valores comunes para poder aplicar agregaciones a cada grupo."
+    },
+    {
+        question: "¿Qué diferencia hay entre WHERE y HAVING?",
+        options: [
+            "WHERE filtra filas antes de agrupar; HAVING filtra grupos",
+            "WHERE ordena y HAVING elimina tablas",
+            "Son exactamente iguales",
+            "HAVING solo sirve para insertar datos"
+        ],
+        answer: 0,
+        explanation: "WHERE filtra las filas de entrada. HAVING filtra los grupos después de GROUP BY y puede usar agregaciones como COUNT()."
+    },
+    {
+        question: "¿Qué devuelve esta consulta?",
+        code: "SELECT categoria, COUNT(*)\nFROM Productos\nGROUP BY categoria;",
+        options: [
+            "El precio promedio de todos los productos",
+            "La cantidad de productos de cada categoría",
+            "Solo una categoría",
+            "Todos los productos ordenados"
+        ],
+        answer: 1,
+        explanation: "GROUP BY forma un grupo por categoría y COUNT(*) cuenta cuántas filas hay en cada grupo."
+    },
+    {
+        question: "¿Qué categorías aparecen en esta consulta?",
+        code: "SELECT categoria, COUNT(*) AS cantidad\nFROM Productos\nGROUP BY categoria\nHAVING COUNT(*) > 2;",
+        options: [
+            "Todas las categorías",
+            "Las categorías con más de dos productos",
+            "Las categorías con exactamente dos productos",
+            "Las categorías sin productos"
+        ],
+        answer: 1,
+        explanation: "HAVING COUNT(*) > 2 conserva únicamente los grupos que contienen más de dos filas."
+    },
+    {
+        question: "¿Qué es una vista (VIEW)?",
+        options: [
+            "Una tabla virtual definida a partir de una consulta",
+            "Una copia de seguridad obligatoria",
+            "Un tipo de contraseña",
+            "Un comando para ordenar"
+        ],
+        answer: 0,
+        explanation: "Una vista guarda la definición de una consulta y permite consultarla como una tabla. Normalmente no almacena los resultados como una tabla física."
+    },
+    {
+        question: "¿Qué hace este comando?",
+        code: "CREATE VIEW ProductosPublicos AS\nSELECT nombre, precio FROM Productos;",
+        options: [
+            "Elimina la tabla Productos",
+            "Crea una vista que expone nombre y precio",
+            "Agrega dos productos",
+            "Crea un usuario"
+        ],
+        answer: 1,
+        explanation: "CREATE VIEW define una vista basada en la consulta. En este caso, muestra las columnas nombre y precio."
+    },
+    {
+        question: "¿Para qué sirve GRANT SELECT?",
+        options: [
+            "Para conceder permiso de consulta",
+            "Para borrar registros",
+            "Para calcular promedios",
+            "Para crear una subconsulta"
+        ],
+        answer: 0,
+        explanation: "GRANT SELECT concede permiso para consultar los objetos indicados, según el sistema gestor y sus privilegios."
+    },
+    {
+        question: "¿Qué hace este comando?",
+        code: "GRANT SELECT ON ProductosPublicos TO lector;",
+        options: [
+            "Crea la vista ProductosPublicos",
+            "Concede al rol lector permiso para consultar la vista",
+            "Elimina el rol lector",
+            "Modifica los precios"
+        ],
+        answer: 1,
+        explanation: "GRANT concede el privilegio SELECT sobre ProductosPublicos al rol lector, si el SGBD admite esa sintaxis y se tienen los permisos necesarios."
+    },
+    {
+        question: "¿Qué es un rol en una base de datos?",
+        options: [
+            "Un conjunto de permisos que puede asignarse a usuarios",
+            "Una función matemática",
+            "Una consulta anidada",
+            "Una columna de texto"
+        ],
+        answer: 0,
+        explanation: "Un rol permite agrupar permisos y asignarlos a usuarios para facilitar la administración del acceso."
+    },
+    {
+        question: "¿Qué consulta combina agregaciones para cada categoría?",
+        code: "SELECT categoria, COUNT(*), AVG(precio),\n       MIN(precio), MAX(precio)\nFROM Productos\nGROUP BY categoria;",
+        options: [
+            "Calcula estadísticas de productos por categoría",
+            "Elimina las categorías",
+            "Solo muestra el producto más caro",
+            "Crea una vista automáticamente"
+        ],
+        answer: 0,
+        explanation: "La consulta cuenta los productos y calcula el promedio, el mínimo y el máximo del precio para cada categoría."
+    }
+];
+
+
+// ===============================
+// LÓGICA DEL QUIZ
+// ===============================
+
+let currentLevel = 1;
 let currentQuestion = 0;
 let score = 0;
 let answered = false;
 
-function loadQuestion() {
+function getQuestions() {
+    return currentLevel === 1 ? level1 : level2;
+}
 
+function showMenu() {
+    document.getElementById("levelMenu").style.display = "block";
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("result").style.display = "none";
+
+    document.getElementById("subtitle").textContent =
+        "Aprende mientras respondes";
+
+    document.getElementById("progressBar").style.width = "0%";
+}
+
+function startLevel(level) {
+    currentLevel = level;
+    currentQuestion = 0;
+    score = 0;
     answered = false;
 
+    document.getElementById("levelMenu").style.display = "none";
+    document.getElementById("result").style.display = "none";
+    document.getElementById("quiz").style.display = "block";
+
+    document.getElementById("subtitle").textContent =
+        level === 1 ? "Nivel 1 · Fundamentos" : "Nivel 2 · SQL avanzado";
+
+    loadQuestion();
+}
+
+function loadQuestion() {
+    answered = false;
+
+    const questions = getQuestions();
     const q = questions[currentQuestion];
 
     document.getElementById("questionNumber").textContent =
@@ -456,130 +802,117 @@ function loadQuestion() {
     const optionsContainer = document.getElementById("options");
     optionsContainer.innerHTML = "";
 
-    document.getElementById("explanation").style.display = "none";
-    document.getElementById("nextButton").style.display = "none";
+    // Mostrar un ejemplo SQL cuando la pregunta lo incluya.
+    if (q.code) {
+        const code = document.createElement("code");
+        code.className = "code-example";
+        code.textContent = q.code;
+        optionsContainer.appendChild(code);
+    }
 
     q.options.forEach((option, index) => {
-
         const button = document.createElement("button");
 
         button.className = "option";
         button.textContent = option;
-
         button.onclick = () => selectAnswer(index, button);
 
         optionsContainer.appendChild(button);
     });
 
-    const progress =
-        ((currentQuestion) / questions.length) * 100;
+    document.getElementById("explanation").style.display = "none";
+    document.getElementById("nextButton").style.display = "none";
 
     document.getElementById("progressBar").style.width =
-        progress + "%";
+        (currentQuestion / questions.length) * 100 + "%";
 }
 
-
 function selectAnswer(index, button) {
-
     if (answered) return;
 
     answered = true;
 
-    const q = questions[currentQuestion];
-
-    const buttons =
-        document.querySelectorAll(".option");
+    const q = getQuestions()[currentQuestion];
+    const buttons = document.querySelectorAll(".option");
 
     buttons.forEach(b => b.disabled = true);
 
     if (index === q.answer) {
-
         button.classList.add("correct");
-
         score++;
-
     } else {
-
         button.classList.add("incorrect");
-
         buttons[q.answer].classList.add("correct");
     }
 
-    const explanation =
-        document.getElementById("explanation");
+    const explanation = document.getElementById("explanation");
 
-    explanation.innerHTML =
-        "<strong>💡 Aprende:</strong> " + q.explanation;
+    explanation.replaceChildren();
 
+    const title = document.createElement("strong");
+    title.textContent = "💡 Explicación: ";
+    explanation.appendChild(title);
+
+    explanation.appendChild(document.createTextNode(q.explanation));
     explanation.style.display = "block";
 
-    document.getElementById("nextButton").style.display =
-        "inline-block";
+    document.getElementById("nextButton").style.display = "inline-block";
 }
 
-
 function nextQuestion() {
-
     currentQuestion++;
 
-    if (currentQuestion < questions.length) {
-
+    if (currentQuestion < getQuestions().length) {
         loadQuestion();
-
     } else {
-
         showResult();
     }
 }
 
-
 function showResult() {
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("result").style.display = "block";
+    document.getElementById("progressBar").style.width = "100%";
 
-    document.getElementById("quiz").style.display =
-        "none";
+    const total = getQuestions().length;
+    const percentage = Math.round((score / total) * 100);
 
-    document.getElementById("result").style.display =
-        "block";
-
-    document.getElementById("progressBar").style.width =
-        "100%";
+    document.getElementById("resultTitle").textContent =
+        currentLevel === 1 ? "Nivel 1 · Fundamentos" : "Nivel 2 · SQL avanzado";
 
     document.getElementById("score").textContent =
-        `${score} / ${questions.length}`;
+        `${score} / ${total}`;
 
     let message;
 
-    if (score >= 18) {
-        message = "🏆 ¡Excelente! Tienes una muy buena base en bases de datos.";
-    } else if (score >= 14) {
-        message = "👏 ¡Muy bien! Solo necesitas reforzar algunos conceptos.";
-    } else if (score >= 10) {
-        message = "📚 Vas por buen camino. Repasa los conceptos que fallaste.";
+    if (percentage >= 90) {
+        message = "¡Excelente! Dominas muy bien estos conceptos.";
+    } else if (percentage >= 70) {
+        message = "¡Muy bien! Tienes una buena comprensión del tema.";
+    } else if (percentage >= 50) {
+        message = "Vas por buen camino. Repasa las explicaciones.";
     } else {
-        message = "💪 Sigue practicando. ¡Cada pregunta es una oportunidad para aprender!";
+        message = "Sigue practicando. ¡Cada intento te ayuda a aprender!";
     }
 
-    document.getElementById("message").textContent =
-        message;
+    document.getElementById("message").textContent = message;
+
+    const nextButton = document.getElementById("nextLevelButton");
+
+    if (currentLevel === 1) {
+        nextButton.style.display = "inline-block";
+        nextButton.textContent = "Ir al nivel 2 →";
+    } else {
+        nextButton.style.display = "none";
+    }
 }
 
-
-function restartQuiz() {
-
-    currentQuestion = 0;
-    score = 0;
-
-    document.getElementById("quiz").style.display =
-        "block";
-
-    document.getElementById("result").style.display =
-        "none";
-
-    loadQuestion();
+function restartLevel() {
+    startLevel(currentLevel);
 }
 
-
-loadQuestion();
+// Mostrar el menú inicial.
+showMenu();
 
 </script>
 
